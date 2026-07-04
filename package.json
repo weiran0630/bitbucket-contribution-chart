@@ -1,0 +1,17 @@
+{
+  "name": "bitbucket-contribution-chart",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "zip": "npm run build && cd dist && zip -r ../bitbucket-contribution-chart.zip ."
+  },
+  "devDependencies": {
+    "@crxjs/vite-plugin": "^2.0.0-beta.28",
+    "@types/chrome": "^0.0.287",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.3"
+  }
+}
