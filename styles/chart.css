@@ -1,10 +1,3 @@
-.bbcc-spacer {
-  width: 100%;
-  height: 0;
-  pointer-events: none;
-  flex-shrink: 0;
-}
-
 .bbcc-widget {
   --bbcc-cell-size: 10px;
   --bbcc-gap: 2px;
@@ -27,17 +20,21 @@
   line-height: 1.4;
 }
 
-.bbcc-infobar {
+.bbcc-popover {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
+  top: 12px;
+  right: 12px;
   z-index: 2147483646;
+  width: min(720px, calc(100vw - 24px));
   margin: 0;
-  padding: 10px 16px;
-  border-bottom: 1px solid var(--bbcc-border);
+  padding: 0;
+  border: 1px solid var(--bbcc-border);
+  border-radius: 8px;
   background: var(--bbcc-bg);
-  box-shadow: 0 1px 2px rgba(60, 64, 67, 0.15);
+  box-shadow:
+    0 4px 16px rgba(60, 64, 67, 0.2),
+    0 1px 3px rgba(60, 64, 67, 0.12);
+  overflow: hidden;
 }
 
 .bbcc-hidden {
@@ -57,6 +54,12 @@
     --bbcc-bg: #292a2d;
     --bbcc-accent: #8ab4f8;
   }
+
+  .bbcc-popover {
+    box-shadow:
+      0 4px 16px rgba(0, 0, 0, 0.45),
+      0 1px 3px rgba(0, 0, 0, 0.3);
+  }
 }
 
 .bbcc-widget *,
@@ -65,24 +68,24 @@
   box-sizing: border-box;
 }
 
-.bbcc-infobar-row {
+.bbcc-popover-header {
   display: flex;
-  align-items: center;
-  gap: 16px;
-  width: 100%;
-  min-height: 44px;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--bbcc-border);
 }
 
-.bbcc-infobar-brand {
+.bbcc-popover-brand {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  flex-shrink: 0;
-  min-width: 140px;
+  min-width: 0;
 }
 
 .bbcc-brand-title {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--bbcc-text);
 }
@@ -90,25 +93,30 @@
 .bbcc-brand-stat {
   font-size: 12px;
   color: var(--bbcc-muted);
-  white-space: nowrap;
 }
 
 .bbcc-brand-stat--error {
   color: #d93025;
 }
 
-.bbcc-chart-wrap {
-  flex: 1;
-  min-width: 0;
+.bbcc-popover-actions {
   display: flex;
   align-items: center;
-  gap: 12px;
-  overflow: hidden;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.bbcc-popover-body {
+  padding: 12px 14px 14px;
+}
+
+.bbcc-chart-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .bbcc-grid-area {
-  flex: 1;
-  min-width: 0;
   overflow-x: auto;
   overflow-y: hidden;
   padding-bottom: 2px;
@@ -154,23 +162,15 @@
 .bbcc-legend {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 3px;
   font-size: 11px;
   color: var(--bbcc-muted);
-  flex-shrink: 0;
   white-space: nowrap;
 }
 
 .bbcc-legend .bbcc-cell {
   outline: none;
-}
-
-.bbcc-infobar-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
-  margin-left: auto;
 }
 
 .bbcc-refresh,
@@ -208,37 +208,37 @@
   background: var(--bbcc-level-0);
 }
 
-.bbcc-loading-body,
-.bbcc-error-body {
-  flex: 1;
-  min-width: 0;
+.bbcc-loading-body {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .bbcc-loading-text {
   color: var(--bbcc-muted);
   margin: 0;
   font-size: 12px;
-  white-space: nowrap;
-  flex-shrink: 0;
 }
 
 .bbcc-error-body p {
-  margin: 0;
+  margin: 0 0 10px;
   color: var(--bbcc-muted);
   font-size: 12px;
 }
 
+.bbcc-error-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .bbcc-progress-bar {
-  flex: 1;
+  width: 100%;
   height: 6px;
   background: var(--bbcc-level-0);
   border-radius: 3px;
   overflow: hidden;
   position: relative;
-  min-width: 120px;
 }
 
 .bbcc-progress-fill {

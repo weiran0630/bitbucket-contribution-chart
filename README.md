@@ -41,7 +41,7 @@ Load the `dist` folder the same way; CRXJS rebuilds on file changes.
    - **read:workspace:bitbucket**
    - **read:repository:bitbucket**
 4. Click **Test connection**, then **Save**
-5. On any Bitbucket page, click the **extension icon** in the toolbar to show or hide the contribution bar
+5. On any Bitbucket page, click the **extension icon** in the toolbar to show or hide the contribution popover
 
 ## How it works
 
