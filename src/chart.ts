@@ -83,12 +83,18 @@ function formatTooltip(date: Date, count: number): string {
   return `${count} ${noun} on ${weekday}, ${month} ${day}, ${year}`;
 }
 
-function infobarActions(): string {
+function popoverHeader(title: string, subtitle: string): string {
   return `
-    <div class="bbcc-infobar-actions">
-      <button type="button" class="bbcc-refresh" title="Refresh data">Refresh</button>
-      <button type="button" class="bbcc-close" title="Hide for this session" aria-label="Close">×</button>
-    </div>
+    <header class="bbcc-popover-header">
+      <div class="bbcc-popover-brand">
+        <span class="bbcc-brand-title">${title}</span>
+        <span class="bbcc-brand-stat">${subtitle}</span>
+      </div>
+      <div class="bbcc-popover-actions">
+        <button type="button" class="bbcc-refresh" title="Refresh data">Refresh</button>
+        <button type="button" class="bbcc-close" title="Close" aria-label="Close">×</button>
+      </div>
+    </header>
   `;
 }
 
@@ -157,11 +163,11 @@ export function renderHeatmap(
   const partialNote = partial ? " · partial data" : "";
 
   container.innerHTML = `
-    <div class="bbcc-infobar-row">
-      <div class="bbcc-infobar-brand">
-        <span class="bbcc-brand-title">Contributions</span>
-        <span class="bbcc-brand-stat">${totalCommits.toLocaleString()} in the last year${cacheNote}${partialNote}</span>
-      </div>
+    ${popoverHeader(
+      "Contributions",
+      `${totalCommits.toLocaleString()} in the last year${cacheNote}${partialNote}`,
+    )}
+    <div class="bbcc-popover-body">
       <div class="bbcc-chart-wrap">
         <div class="bbcc-grid-area">
           <div class="bbcc-grid" role="img" aria-label="Contribution activity heatmap"></div>
@@ -172,7 +178,6 @@ export function renderHeatmap(
           <span>More</span>
         </div>
       </div>
-      ${infobarActions()}
     </div>
     <div class="bbcc-tooltip" hidden></div>
   `;
@@ -208,18 +213,14 @@ export function renderLoading(
   const indeterminate = phase === "listing" || (total === 0 && phase === "scanning");
 
   container.innerHTML = `
-    <div class="bbcc-infobar-row">
-      <div class="bbcc-infobar-brand">
-        <span class="bbcc-brand-title">Contributions</span>
-        <span class="bbcc-brand-stat">Loading…</span>
-      </div>
+    ${popoverHeader("Contributions", "Loading…")}
+    <div class="bbcc-popover-body">
       <div class="bbcc-loading-body">
         <p class="bbcc-loading-text">${statusText}</p>
         <div class="bbcc-progress-bar${indeterminate ? " bbcc-progress-bar--indeterminate" : ""}" role="progressbar" aria-valuenow="${indeterminate ? 0 : pct}" aria-valuemin="0" aria-valuemax="100">
           <div class="bbcc-progress-fill" style="width: ${indeterminate ? "100%" : `${pct}%`}"></div>
         </div>
       </div>
-      ${infobarActions()}
     </div>
   `;
 }
@@ -234,30 +235,17 @@ export function renderError(
     : "";
 
   container.innerHTML = `
-    <div class="bbcc-infobar-row">
-      <div class="bbcc-infobar-brand">
-        <span class="bbcc-brand-title">Contributions</span>
-        <span class="bbcc-brand-stat bbcc-brand-stat--error">Could not load</span>
-      </div>
+    ${popoverHeader("Contributions", "Could not load")}
+    <div class="bbcc-popover-body">
       <div class="bbcc-error-body">
         <p>${escapeHtml(message)}</p>
-        ${optionsLink}
-        <button type="button" class="bbcc-retry">Try again</button>
+        <div class="bbcc-error-actions">
+          ${optionsLink}
+          <button type="button" class="bbcc-retry">Try again</button>
+        </div>
       </div>
-      ${infobarActions()}
     </div>
   `;
-}
-
-export function syncSpacer(): void {
-  const widget = document.getElementById("bbcc-contribution-widget");
-  const spacer = document.getElementById("bbcc-spacer");
-  if (!spacer) return;
-  if (!widget || widget.classList.contains("bbcc-hidden")) {
-    spacer.style.height = "0px";
-    return;
-  }
-  spacer.style.height = `${widget.offsetHeight}px`;
 }
 
 function escapeHtml(s: string): string {

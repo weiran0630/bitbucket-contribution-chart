@@ -1,16 +1,15 @@
 import { shouldShowChart } from "./api/bitbucket";
-import { renderError, renderHeatmap, renderLoading, syncSpacer } from "./chart";
+import { renderError, renderHeatmap, renderLoading } from "./chart";
 import type { ContributionResponse, MessageRequest, MessageResponse } from "./types";
 
 const WIDGET_ID = "bbcc-contribution-widget";
-const SPACER_ID = "bbcc-spacer";
 const FETCH_TIMEOUT_MS = 30 * 60 * 1000;
 
 let injectionChecked = false;
 let injectOnThisPage = false;
 let loading = false;
 let pendingResult: ((response: ContributionResponse) => void) | null = null;
-let resizeObserver: ResizeObserver | null = null;
+let dismissListenersBound = false;
 
 function sendMessage<T extends MessageResponse>(
   message: Record<string, unknown>,
@@ -23,47 +22,48 @@ function isVisible(): boolean {
   return Boolean(widget && !widget.classList.contains("bbcc-hidden"));
 }
 
-function ensureSpacer(): HTMLElement {
-  let spacer = document.getElementById(SPACER_ID);
-  if (!spacer) {
-    spacer = document.createElement("div");
-    spacer.id = SPACER_ID;
-    spacer.className = "bbcc-spacer";
-    document.body.prepend(spacer);
-  }
-  return spacer;
-}
-
 function mountWidget(): HTMLElement {
   let widget = document.getElementById(WIDGET_ID);
   if (widget) return widget;
 
-  ensureSpacer();
-
   widget = document.createElement("section");
   widget.id = WIDGET_ID;
-  widget.className = "bbcc-widget bbcc-infobar";
+  widget.className = "bbcc-widget bbcc-popover";
+  widget.setAttribute("role", "dialog");
   widget.setAttribute("aria-label", "Bitbucket contribution chart");
-  document.documentElement.prepend(widget);
+  widget.setAttribute("aria-modal", "false");
+  document.body.appendChild(widget);
 
-  if (!resizeObserver) {
-    resizeObserver = new ResizeObserver(() => syncSpacer());
-    resizeObserver.observe(widget);
-  }
-
+  bindDismissListeners();
   return widget;
+}
+
+function bindDismissListeners(): void {
+  if (dismissListenersBound) return;
+  dismissListenersBound = true;
+
+  document.addEventListener("mousedown", (e) => {
+    const widget = document.getElementById(WIDGET_ID);
+    if (!widget || widget.classList.contains("bbcc-hidden")) return;
+    if (widget.contains(e.target as Node)) return;
+    hideWidget();
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "Escape") return;
+    if (!isVisible()) return;
+    hideWidget();
+  });
 }
 
 function hideWidget(): void {
   const widget = document.getElementById(WIDGET_ID);
   widget?.classList.add("bbcc-hidden");
-  syncSpacer();
 }
 
 function showWidget(): HTMLElement {
   const widget = mountWidget();
   widget.classList.remove("bbcc-hidden");
-  syncSpacer();
   return widget;
 }
 
@@ -91,7 +91,7 @@ function deliverPending(response: ContributionResponse): void {
   }
 }
 
-function bindInfobarActions(widget: HTMLElement, onRefresh: () => void): void {
+function bindPopoverActions(widget: HTMLElement, onRefresh: () => void): void {
   widget.querySelector(".bbcc-refresh")?.addEventListener("click", onRefresh);
   widget.querySelector(".bbcc-retry")?.addEventListener("click", onRefresh);
   widget.querySelector(".bbcc-close")?.addEventListener("click", hideWidget);
@@ -108,8 +108,7 @@ function handleContributionResponse(
 ): void {
   if (response.type === "error") {
     renderError(widget, response.message, response.needsAuth);
-    bindInfobarActions(widget, onRefresh);
-    syncSpacer();
+    bindPopoverActions(widget, onRefresh);
     return;
   }
 
@@ -120,8 +119,7 @@ function handleContributionResponse(
       partial: response.partial,
       fromCache: response.fromCache,
     });
-    bindInfobarActions(widget, onRefresh);
-    syncSpacer();
+    bindPopoverActions(widget, onRefresh);
   }
 }
 
@@ -147,7 +145,7 @@ async function ensureInjectionAllowed(): Promise<boolean> {
         ? userRes.error
         : "Configure your API token in extension options.";
     renderError(widget, err, true);
-    bindInfobarActions(widget, () => {
+    bindPopoverActions(widget, () => {
       injectionChecked = false;
       injectOnThisPage = false;
       void loadContributions();
@@ -169,7 +167,6 @@ async function loadContributions(refresh = false): Promise<void> {
   loading = true;
   const widget = showWidget();
   renderLoading(widget, 0, 0, "", "listing");
-  syncSpacer();
 
   try {
     const response = await sendMessage<ContributionResponse>({
@@ -219,7 +216,6 @@ chrome.runtime.onMessage.addListener(
         msg.repoName,
         msg.phase ?? "scanning",
       );
-      syncSpacer();
       return;
     }
 
@@ -242,9 +238,8 @@ function onRouteChange(): void {
   lastPath = location.pathname;
   injectionChecked = false;
   injectOnThisPage = false;
+  dismissListenersBound = false;
   document.getElementById(WIDGET_ID)?.remove();
-  document.getElementById(SPACER_ID)?.remove();
-  resizeObserver = null;
 }
 
 const routeObserver = new MutationObserver(() => onRouteChange());
