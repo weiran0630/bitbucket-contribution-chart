@@ -1,8 +1,7 @@
 # Bitbucket Contribution Chart
 
 Chrome extension that adds a **GitHub-style contribution heatmap** to your Bitbucket Cloud profile.
-<img width="1294" height="98" alt="image" src="https://github.com/user-attachments/assets/44744272-da68-49c7-a197-ced8280ead66" />
-
+<img width="746" height="252" alt="image" src="https://github.com/user-attachments/assets/bc2d91e6-2a21-442a-9ef1-cbe08db11f89" />
 
 ## Features
 
